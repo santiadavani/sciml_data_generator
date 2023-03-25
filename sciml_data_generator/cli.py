@@ -5,42 +5,32 @@ import os
 import numpy as np
 import time
 
-"""base_file_name = 'Hollister_Test_c_5m'
+import logging
+from rich.logging import RichHandler
 
-# model npy files Hollister_Test_c_5m
-mdl_dir = '../Input_Model_npy_files/'
-sus_name = 'Pipe_Model_samp_sus_'
-kx_name = 'Pipe_Model_samp_kx_'
-ky_name = 'Pipe_Model_samp_ky_'
-kz_name = 'Pipe_Model_samp_kz_'
+FORMAT = "%(message)s"
+logging.basicConfig(
+    level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+)
+log = logging.getLogger("rich")
 
-# Observation points location directory and file name
-
-data_dir = '../Receiver_Positions/'
-data_file = 'rx_pts_depop_1078.csv'
-
-results_dir = '../Generated_Data/'
-results_file_base = 'Gen_Hollister_Test_c_5m_kx_ky_kz_'
-
-n_cpu = 1
-n_samp = 12
-#********** INPUT PARAMS **********
-ismag    = True
-istensor = False
-
-# ambient magnetic flux B[nT]
-
-Bx = 4594.8
-By = 19887.1 
-Bz = 41568.2
-# Bv = np.sqrt(Bx**2 + By**2 + Bz**2)
-
-# measurement direction
-LX = 1.
-LY = 1.
-LZ = 1.
-"""
-
+def load_mesh_files(file_dir, base_file):
+    # read the no. of nodes and cells
+    f      = open(file_dir+base_file+'.1.node', 'r')
+    line   = f.readline()
+    nnodes = int(line.split()[0])
+    
+    f.close()
+    f      = open(file_dir+base_file+'.1.ele', 'r')
+    line   = f.readline()
+    ncels  = int(line.split()[0])
+    
+    f.close()
+    # read the nodes, cells and the density of the cells
+    nodes = np.loadtxt(file_dir+base_file+'.1.node', usecols=(1,2,3),   skiprows=1, max_rows=nnodes, dtype=float)
+    eles  = np.loadtxt(file_dir+base_file+'.1.ele', usecols=(1,2,3,4), skiprows=1, max_rows=ncels , dtype=int)
+    eles  = eles - 1
+    return nnodes, ncels, nodes, eles
 
 @click.command()
 @click.option(
@@ -140,13 +130,29 @@ LZ = 1.
     help="Ambient magnetic flux Bz",
     show_default=True,
 )
-def main(args=None):
+def main(**kwargs):
     """Console script for sciml_data_generator."""
     click.echo(
         "Replace this message by putting your code into "
         "sciml_data_generator.cli.main"
     )
     click.echo("See click documentation at https://click.palletsprojects.com/")
+    print(kwargs)
+    
+    bx = kwargs["bx"]
+    by = kwargs["by"]
+    bz = kwargs["bz"]
+    mesh_dir = kwargs["mesh_dir"]
+    base_file_name = kwargs["base_file_name"]
+    nverts, ntets, verts, tetra = load_mesh_files(mesh_dir, base_file_name)
+
+    bv = np.sqrt(bx**2 + by**2 + bz**2)
+    
+    LX = np.float32(bx/bv)
+    LY = np.float32(by/bv)
+    LZ = np.float32(bz/bv)
+
+    
     return 0
 
 
