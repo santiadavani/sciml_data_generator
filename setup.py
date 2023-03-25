@@ -35,6 +35,8 @@ setup(
         ],
     },
     install_requires=requirements,
+        data_files=[('lib', ['sciml_data_generator/lib/calc_and_mig_kx_ky_kz.cpython-310-x86_64-linux-gnu.so'])],
+
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
