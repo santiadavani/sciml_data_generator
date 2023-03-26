@@ -5,7 +5,7 @@ mesh:
   base_file_name: "Hollister_Test_c_5m"
 
 model:
-  dir_name: '../Input_Model_npy_files/'
+  dir_name: '/Users/USP/S2Labs/empact/Magnetic_Data_Generation_For_AI_Training/Input_Model_npy_files/'
   sus_name_prefix: 'Pipe_Model_samp_sus_'
   kx_name_prefix:  'Pipe_Model_samp_kx_'
   ky_name_prefix:  'Pipe_Model_samp_ky_'

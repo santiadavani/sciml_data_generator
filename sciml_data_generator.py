@@ -9,6 +9,7 @@ import ctypes
 import calc_and_mig_kx_ky_kz
 import logging
 from rich.logging import RichHandler
+from tqdm import tqdm
 
 FORMAT = "%(message)s"
 logging.basicConfig(
@@ -104,7 +105,29 @@ def vol_tets(ndes, tetnds):
 
 
 def calc_and_migrate_field_one_mdl(
-    x, ntets, rho_sus, Bv, KXt, KYt, KZt, mdl_dir, sus_name, kx_name, ky_name, kz_name, ismag
+    x,
+    ntets,
+    rho_sus,
+    Bv,
+    KXt,
+    KYt,
+    KZt,
+    LX,
+    LY,
+    LZ,
+    nodes,
+    tets,
+    obs_pts,
+    n_obs,
+    ctet,
+    vtet,
+    mdl_dir,
+    sus_name,
+    kx_name,
+    ky_name,
+    kz_name,
+    ismag,
+    istensor,
 ):
     # global rho_sus, KXt, KYt, KZt
     sus_file = mdl_dir + sus_name + str(x) + ".npy"
@@ -127,6 +150,11 @@ def calc_and_migrate_field_one_mdl(
         rho_sus = rho_sus * Bv
 
     # Load the shared object file
+    # lib_path = 'sciml_data_generator/lib/calc_and_mig_kx_ky_kz.cpython-37m-darwin.so'
+    # calc_and_mig_kx_ky_kz = ctypes.cdll.LoadLibrary(lib_path)
+
+    # Call a function in the shared object file
+
     mig_data = calc_and_mig_kx_ky_kz.calc_and_mig_field(
         rho_sus,
         ismag,
@@ -236,9 +264,10 @@ def main(config_file):
     ky_name = config["model"]["ky_name_prefix"]
     kz_name = config["model"]["kz_name_prefix"]
     ismag = config["ismag"]
+    istensor = config["istensor"]
 
     mig_field_all = []
-    for _id in mdl_id:
+    for _id in tqdm(mdl_id):
         mig_field = calc_and_migrate_field_one_mdl(
             _id,
             ntets,
@@ -247,12 +276,22 @@ def main(config_file):
             KXt,
             KYt,
             KZt,
+            LX,
+            LY,
+            LZ,
+            nodes,
+            tets,
+            obs_pts,
+            n_obs,
+            ctet,
+            vtet,
             mdl_dir,
             sus_name,
             kx_name,
             ky_name,
             kz_name,
             ismag,
+            istensor,
         )
         mig_field_all.append(mig_field)
 
